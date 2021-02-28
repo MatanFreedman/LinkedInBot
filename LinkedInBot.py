@@ -17,6 +17,8 @@ from DBConnection import DBConnection
 
 class LinkedInBot:
     def __init__(self, delay=5):
+        if not os.path.exists("data"):
+            os.makedirs("data")
         log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         logging.basicConfig(level=logging.INFO, format=log_fmt)
         self.delay=delay
