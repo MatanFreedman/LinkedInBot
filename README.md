@@ -17,7 +17,7 @@ bot = LinkedInBot()
 bot.run(EMAIL, PASSWORD, "Data Scientist", "Canada")
 ```
 
-Once you've logged in once, the bot will save the browser cookies for reuse next time. If you wanted to configure your own 'run' function you might use the following functions:
+Once you've logged in once, the bot will save the browser cookies for reuse next time. If you wanted to configure your own 'run' function you'd use the following functions:
 
 ```
 # log in and save cookies:
