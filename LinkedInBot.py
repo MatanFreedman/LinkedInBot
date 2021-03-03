@@ -17,6 +17,13 @@ from DBConnection import DBConnection
 
 class LinkedInBot:
     def __init__(self, delay=5):
+                """
+        Parameters
+        ----------
+        delay : int, optional
+            Sets amount of time to wait after some actions (so that LinkedIn doesn't start using captcha)
+
+        """
         if not os.path.exists("data"):
             os.makedirs("data")
         log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -26,7 +33,13 @@ class LinkedInBot:
         self.driver = webdriver.Firefox(executable_path="geckodriver.exe")
 
     def login(self, email, password):
-        """Go to linkedin and login"""
+        """Go to linkedin and login
+        
+        Parameters
+        ----------
+        email : str
+        password : str
+        """
         # go to linkedin:
         logging.info("Logging in")
         self.driver.maximize_window()
@@ -40,17 +53,35 @@ class LinkedInBot:
         time.sleep(self.delay)
 
     def save_cookie(self, path):
+        """Saves browser cookies.
+        Parameters
+        ----------
+        path : str
+            path must exist (except for file)
+        """
         with open(path, 'wb') as filehandler:
             pickle.dump(self.driver.get_cookies(), filehandler)
 
     def load_cookie(self, path):
+        """Loads cookies from file
+
+        Parameters
+        ----------
+        path : str
+            Path must exist
+        """
         with open(path, 'rb') as cookiesfile:
             cookies = pickle.load(cookiesfile)
             for cookie in cookies:
                 self.driver.add_cookie(cookie)
 
     def search_linkedin(self, keywords, location):
-        """Enter keywords into search bar
+        """Enter keywords into search bar.
+
+        Parameters
+        ----------
+        keywords : str
+        location : str
         """
         logging.info("Searching jobs page")
         self.driver.get("https://www.linkedin.com/jobs/")
@@ -68,17 +99,21 @@ class LinkedInBot:
         time.sleep(self.delay)
     
     def wait(self, t_delay=None):
-        """Just easier to build this in here.
+        """Make bot wait for t_delay seconds.
         Parameters
         ----------
-        t_delay [optional] : int
+        t_delay : int, optional
             seconds to wait.
         """
         delay = self.delay if t_delay == None else t_delay
         time.sleep(delay)
 
     def scroll_to(self, job_list_item):
-        """Just a function that will scroll to the list item in the column 
+        """Scroll to the list item in the column 
+
+        Parameters
+        ----------
+        job_list_item : selenium element
         """
         self.driver.execute_script("arguments[0].scrollIntoView();", job_list_item)
         job_list_item.click()
@@ -93,13 +128,20 @@ class LinkedInBot:
 
         Returns
         -------
-        list of strings : [position, company, location, details]
+        list of str : [position, company, location, details]
         """
         [position, company, location] = job.text.split('\n')[:3]
         details = self.driver.find_element_by_id("job-details").text
         return [position, company, location, details]
 
     def wait_for_element_ready(self, by, text):
+        """Waits for an element to be ready
+
+        Parameters
+        ----------
+        by : Selenium BY object
+        text : str
+        """
         try:
             WebDriverWait(self.driver, self.delay).until(EC.presence_of_element_located((by, text)))
         except TimeoutException:
@@ -107,11 +149,20 @@ class LinkedInBot:
             pass
 
     def close_session(self):
-        """This function closes the actual session"""
+        """Closes session
+        """
         logging.info("Closing session")
         self.driver.close()
 
-    def run(self, email, password, keywords, location, db=None):
+    def run(self, email, password, keywords, location):
+        """Searchs keywords + location, then scrapes first 8 pages of LinkedIn.
+        After completed, will just post message "Done Scraping".
+
+        Parameters
+        ----------
+        keywords : str
+        location : str
+        """
         db = DBConnection()
         log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         logging.basicConfig(level=logging.INFO, format=log_fmt)
